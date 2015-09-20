@@ -23,6 +23,9 @@
 # \e[K  => clears everything after the cursor on the current line
 # \e[2K => clear everything on the current line
 
+# vi mode
+normal_mode="%F{green}△%f"
+insert_mode="%F{blue}▲%f"
 
 # turns seconds into human readable time
 # 165392 => 1d 21h 56m 32s
@@ -107,6 +110,11 @@ prompt_pure_string_length_to_var() {
 	typeset -g "${var}"="${length}"
 }
 
+zle-line-init zle-keymap-select()
+{
+    prompt_pure_preprompt_render
+}
+
 prompt_pure_preprompt_render() {
 	# check that no command is currently running, the preprompt will otherwise be rendered in the wrong place
 	[[ -n ${prompt_pure_cmd_timestamp+x} && "$1" != "precmd" ]] && return
@@ -125,6 +133,22 @@ prompt_pure_preprompt_render() {
 	preprompt+=$prompt_pure_username
 	# execution time
 	preprompt+="%F{yellow}${prompt_pure_cmd_exec_time}%f"
+
+    # vi mode
+    #preprompt+=" ${${KEYMAP/vicmd/$normal_mode}/(main|viins)/$insert_mode}"
+    case $KEYMAP in
+        vicmd) 
+            echo -ne '\033[2 q'
+            preprompt+=" $normal_mode"
+            ;;
+        main|vivins)
+            echo -ne '\033[6 q'
+            preprompt+=" $insert_mode"
+            ;;
+        *) echo -ne '\033[6 q'
+            ;;
+    esac
+
 
 	# if executing through precmd, do not perform fancy terminal editing
 	if [[ "$1" == "precmd" ]]; then
@@ -338,6 +362,10 @@ prompt_pure_setup() {
 
 	# prompt turns red if the previous command didn't exit with 0
 	PROMPT="%(?.%F{magenta}.%F{red})${PURE_PROMPT_SYMBOL:-❯}%f "
+
+    # hooks
+    zle -N zle-line-init
+    zle -N zle-keymap-select
 }
 
 prompt_pure_setup "$@"
