@@ -138,14 +138,14 @@ prompt_pure_preprompt_render() {
     #preprompt+=" ${${KEYMAP/vicmd/$normal_mode}/(main|viins)/$insert_mode}"
     case $KEYMAP in
         vicmd) 
-            echo -ne '\033[2 q'
+            #echo -ne '\033[2 q'
             preprompt+=" $normal_mode"
             ;;
         main|vivins)
-            echo -ne '\033[6 q'
+            #echo -ne '\033[6 q'
             preprompt+=" $insert_mode"
             ;;
-        *) echo -ne '\033[6 q'
+        *) #echo -ne '\033[6 q'
             ;;
     esac
 
